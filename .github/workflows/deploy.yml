@@ -34,3 +34,12 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Upload CloudFormation template to S3 (artifact bucket)
+        env:
+          ARTIFACT_BUCKET: my-ecs-artifacts-396608771737-eu-central-1
+        run: |
+          if [ -z "$ARTIFACT_BUCKET" ]; then
+            echo "ERROR: ARTIFACT_BUCKET secret not set"; exit 1
+          fi
+          aws s3 cp ecs-fargate-template.yaml "s3://$ARTIFACT_BUCKET/ecs-fargate-template.yaml"
