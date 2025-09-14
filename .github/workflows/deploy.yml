@@ -1,31 +1,44 @@
 name: Deploy to ECS
+
 on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ECS-GitHubActionsRole-M4sdeipbXTrS
+          role-to-assume: arn:aws:iam::396608771737:role/ECS-GitHubActionsRole-M4sdeipbXTrS
           aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Build and push Docker image to ECR
         run: |
-          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 396608771737.dkr.ecr.eu-central-1.amazonaws.com
-          docker build --platform linux/amd64 -t my-java-app .
-          docker tag my-java-app:latest 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest
-          docker push 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest
+          # Enable buildx for cross-platform builds
+          docker buildx create --use
+          docker buildx build --platform linux/amd64 \
+            -t 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest \
+            --push .
+
       - name: Upload CloudFormation template to S3
         run: |
           aws s3 cp ecs-fargate-template.yaml s3://my-ecs-artifacts-396608771737-eu-central-1/ecs-fargate-template.yaml
+
       - name: Trigger CodePipeline
         run: |
-          aws codepipeline start-pipeline-execution --name ECS-CodePipeline-56UYGSN2If5E --region eu-central-1
+          aws codepipeline start-pipeline-execution \
+            --name ECS-CodePipeline-56UYGSN2If5E \
+            --region eu-central-1
