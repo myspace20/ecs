@@ -19,7 +19,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::396608771737:role/ECS-GitHubActionsRole-M4sdeipbXTrS
+          role-to-assume: arn:aws:iam::396608771737:role/ECS-GitHubActionsRole-fx8OSSFOUuXB
           aws-region: eu-central-1
 
       - name: Login to Amazon ECR
@@ -40,5 +40,5 @@ jobs:
       - name: Trigger CodePipeline
         run: |
           aws codepipeline start-pipeline-execution \
-            --name ECS-CodePipeline-56UYGSN2If5E \
+            --name ECS-CodePipeline-cpu3dktZmOps \
             --region eu-central-1
