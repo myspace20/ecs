@@ -1,45 +1,31 @@
-name: Build and Push to ECR
-
+name: Deploy to ECS
 on:
   push:
     branches:
       - main
-
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
-  build-and-push:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::396608771737:role/ECS-GitHubActionsRole-fx8OSSFOUuXB
+          role-to-assume: ECS-GitHubActionsRole-M4sdeipbXTrS
           aws-region: eu-central-1
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build, tag, and push image to Amazon ECR
-        env:
-          ECR_REGISTRY: 396608771737.dkr.ecr.eu-central-1.amazonaws.com
-          ECR_REPOSITORY: my-java-app
-          IMAGE_TAG: latest
+      - name: Build and push Docker image to ECR
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Upload CloudFormation template to S3 (artifact bucket)
-        env:
-          ARTIFACT_BUCKET: my-ecs-artifacts-396608771737-eu-central-1
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 396608771737.dkr.ecr.eu-central-1.amazonaws.com
+          docker build --platform linux/amd64 -t my-java-app .
+          docker tag my-java-app:latest 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest
+          docker push 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest
+      - name: Upload CloudFormation template to S3
         run: |
-          if [ -z "$ARTIFACT_BUCKET" ]; then
-            echo "ERROR: ARTIFACT_BUCKET secret not set"; exit 1
-          fi
-          aws s3 cp ecs-fargate-template.yaml "s3://$ARTIFACT_BUCKET/ecs-fargate-template.yaml"
+          aws s3 cp ecs-fargate-template.yaml s3://my-ecs-artifacts-396608771737-eu-central-1/ecs-fargate-template.yaml
+      - name: Trigger CodePipeline
+        run: |
+          aws codepipeline start-pipeline-execution --name ECS-CodePipeline-56UYGSN2If5E --region eu-central-1
