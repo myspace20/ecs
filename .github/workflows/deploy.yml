@@ -19,7 +19,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::396608771737:role/ECS-GitHubActionsRole-Bw6Smnmkd2S0
+          role-to-assume: arn:aws:iam::396608771737:role/ECS-GitHubActionsRole-KJtFQMz9Da6R
           aws-region: eu-central-1
 
       - name: Login to Amazon ECR
@@ -33,9 +33,14 @@ jobs:
             -t 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest \
             --push .
 
-      - name: Upload CloudFormation template to S3
+      - name: Create zip file for CloudFormation template
         run: |
-          aws s3 cp ecs-fargate-template.yaml s3://my-ecs-artifacts-396608771737-eu-central-1/ecs-fargate-template.yaml
+          zip -r ecs-fargate-template.zip ecs-fargate-template.yaml
+
+      - name: Upload CloudFormation template zip to S3
+        run: |
+          aws s3 cp ecs-fargate-template.zip \
+            s3://my-ecs-artifacts-396608771737-eu-central-1/ecs-fargate-template.zip
 
       - name: Trigger CodePipeline
         run: |
