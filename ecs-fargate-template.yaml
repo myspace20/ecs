@@ -2,6 +2,46 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: ECS Fargate service update
 
 Parameters:
+  AvailabilityZone1:
+    Type: String
+    Default: "eu-central-1a"
+  AvailabilityZone2:
+    Type: String
+    Default: "eu-central-1b"
+  GitHubUsername:
+    Type: String
+    Default: "myspace20"
+  GitHubRepoName:
+    Type: String
+    Default: "ecs"
+  PublicSubnetCidr1:
+    Type: String
+    Default: "10.0.1.0/24"
+  PublicSubnetCidr2:
+    Type: String
+    Default: "10.0.2.0/24"
+  PrivateSubnetCidr1:
+    Type: String
+    Default: "10.0.3.0/24"
+  PrivateSubnetCidr2:
+    Type: String
+    Default: "10.0.4.0/24"
+  VpcCidr:
+    Type: String
+    Default: "vpc-08972255a244f91ee"
+  AppPort:
+    Type: String
+    Default: "8080"
+  ImageRepoName:
+    Type: String
+    Default: ""
+  TaskCpu:
+    Type: String
+    Default: "256"
+  TaskMemory:
+    Type: String
+    Default: "512"
+
   ECRImageUri:
     Type: String
     Default: 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest
@@ -14,6 +54,7 @@ Parameters:
   ExecutionRoleArn:
     Type: String
     Default: arn:aws:iam::396608771737:role/ecsTaskExecutionRole
+
 
 
 Resources:
