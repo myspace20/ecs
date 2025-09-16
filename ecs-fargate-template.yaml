@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: ECS Fargate service update
+Description: ECS Fargate service update with CodeDeploy blue/green
 
 Parameters:
   AvailabilityZone1:
@@ -8,12 +8,6 @@ Parameters:
   AvailabilityZone2:
     Type: String
     Default: "eu-central-1b"
-  GitHubUsername:
-    Type: String
-    Default: "myspace20"
-  GitHubRepoName:
-    Type: String
-    Default: "ecs"
   PublicSubnetCidr1:
     Type: String
     Default: "10.0.1.0/24"
@@ -32,19 +26,6 @@ Parameters:
   AppPort:
     Type: String
     Default: "8080"
-  ImageRepoName:
-    Type: String
-    Default: ""
-  TaskCpu:
-    Type: String
-    Default: "256"
-  TaskMemory:
-    Type: String
-    Default: "512"
-
-  ECRImageUri:
-    Type: String
-    Default: 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest
   ClusterName:
     Type: String
     Default: my-ecs-cluster
@@ -54,10 +35,20 @@ Parameters:
   ExecutionRoleArn:
     Type: String
     Default: arn:aws:iam::396608771737:role/ecsTaskExecutionRole
-
-
+  ECRImageUri:
+    Type: String
+    Default: 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest
+  ALBArn:
+    Type: String
+    Default: arn:aws:elasticloadbalancing:eu-central-1:396608771737:loadbalancer/app/my-alb/4f64674e64752d4a
 
 Resources:
+  ECSLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/my-java-app
+      RetentionInDays: 14
+
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -71,18 +62,44 @@ Resources:
         - Name: my-java-app
           Image: !Ref ECRImageUri
           PortMappings:
-            - ContainerPort: 8080
+            - ContainerPort: !Ref AppPort
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: /ecs/my-java-app
+              awslogs-group: !Ref ECSLogGroup
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
+
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: ecs-tg-bluegreen
+      Port: !Ref AppPort
+      Protocol: HTTP
+      VpcId: !Ref VpcCidr  # maps your VPC
+      TargetType: ip
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
 
   ServiceUpdate:
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref ClusterName
+      ServiceName: !Ref ServiceName
       TaskDefinition: !Ref TaskDefinition
       DeploymentController:
         Type: CODE_DEPLOY
+      DesiredCount: 1
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PrivateSubnetCidr1
+            - !Ref PrivateSubnetCidr2
+          AssignPublicIp: DISABLED
+      LoadBalancers:
+        - ContainerName: my-java-app
+          ContainerPort: !Ref AppPort
+          TargetGroupArn: !Ref ALBTargetGroup
