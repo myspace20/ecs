@@ -83,7 +83,6 @@ Resources:
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref ClusterName
-      ServiceName: !Ref ServiceName
       TaskDefinition: !Ref TaskDefinition
       DeploymentController:
         Type: CODE_DEPLOY
