@@ -28,7 +28,7 @@ Parameters:
     Default: "10.0.4.0/24"
   VpcCidr:
     Type: String
-    Default: "vpc-08972255a244f91ee"
+    Default: "10.0.0.0/16"
   AppPort:
     Type: String
     Default: "8080"
