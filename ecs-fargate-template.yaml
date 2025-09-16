@@ -4,6 +4,7 @@ Description: ECS Fargate service update
 Parameters:
   ECRImageUri:
     Type: String
+    Default: 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest
   ClusterName:
     Type: String
     Default: my-ecs-cluster
@@ -12,6 +13,8 @@ Parameters:
     Default: my-java-app-service
   ExecutionRoleArn:
     Type: String
+    Default: arn:aws:iam::396608771737:role/ecsTaskExecutionRole
+
 
 Resources:
   TaskDefinition:
