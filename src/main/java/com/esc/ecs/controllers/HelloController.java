@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
     @GetMapping("/")
     public String hello() {
-        return "App is running with Spring Boot! and updated";
+        return "App is running with Spring Boot! and updated blue green";
     }
     @GetMapping("/health")
     public String health() {
