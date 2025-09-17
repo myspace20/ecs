@@ -1,4 +1,4 @@
-name: Build & Deploy to ECR
+name: Build & Deploy to ECS (via CodePipeline)
 
 on:
   push:
@@ -7,13 +7,14 @@ on:
 
 permissions:
   contents: read
-  id-token: write       # Needed for OIDC
+  id-token: write   # Needed for OIDC with AWS
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
@@ -24,18 +25,27 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 396608771737.dkr.ecr.eu-central-1.amazonaws.com
+          aws ecr get-login-password --region eu-central-1 \
+            | docker login --username AWS --password-stdin 396608771737.dkr.ecr.eu-central-1.amazonaws.com
 
       - name: Build Docker image
         run: |
           docker build -t java-web-app:latest .
           docker tag java-web-app:latest 396608771737.dkr.ecr.eu-central-1.amazonaws.com/java-web-app:latest
 
-      - name: Push Docker image
+      - name: Push Docker image to ECR
         run: |
           docker push 396608771737.dkr.ecr.eu-central-1.amazonaws.com/java-web-app:latest
 
+      - name: Prepare ECS artifacts
+        run: |
+          echo "Packaging ECS deployment artifacts..."
+          zip -r deploy_bundle.zip appspec.yml taskdef.json
+
       - name: Upload ECS artifacts to S3
         run: |
-          aws s3 cp appspec.yml s3://java-web-artifacts-eu-central-1/source/appspec.yml
-          aws s3 cp taskdef.json s3://java-web-artifacts-eu-central-1/source/taskdef.json
+          aws s3 cp deploy_bundle.zip s3://java-web-artifacts-eu-central-1/source/deploy_bundle.zip
+
+      - name: Trigger CodePipeline
+        run: |
+          aws codepipeline start-pipeline-execution --name java-web-pipeline
