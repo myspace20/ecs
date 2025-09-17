@@ -46,6 +46,6 @@ jobs:
         run: |
           aws s3 cp deploy_bundle.zip s3://java-web-artifacts-eu-central-1/source/deploy_bundle.zip
 
-      - name: Trigger CodePipeline
-        run: |
-          aws codepipeline start-pipeline-execution --name java-web-pipeline
+#      - name: Trigger CodePipeline
+#        run: |
+#          aws codepipeline start-pipeline-execution --name java-web-pipeline
