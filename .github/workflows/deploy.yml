@@ -1,49 +1,41 @@
-name: Deploy to ECS
+name: Build & Deploy to ECR
 
 on:
   push:
     branches:
       - main
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
+permissions:
+  contents: read
+  id-token: write       # Needed for OIDC
 
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::396608771737:role/ECS-GitHubActionsRole-d0QhK6btHZSI
+          role-to-assume: arn:aws:iam::396608771737:role/iam-GitHubActionsRole-k1Tfuq6j0w6y
           aws-region: eu-central-1
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push Docker image to ECR
         run: |
-          # Enable buildx for cross-platform builds
-          docker buildx create --use
-          docker buildx build --platform linux/amd64 \
-            -t 396608771737.dkr.ecr.eu-central-1.amazonaws.com/my-java-app:latest \
-            --push .
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin 396608771737.dkr.ecr.eu-central-1.amazonaws.com
 
-      - name: Create zip file for CloudFormation template
+      - name: Build Docker image
         run: |
-          zip -r ecs-fargate-template.zip ecs-fargate-template.yaml
+          docker build -t java-web-app:latest .
+          docker tag java-web-app:latest 396608771737.dkr.ecr.eu-central-1.amazonaws.com/java-web-app:latest
 
-      - name: Upload CloudFormation template zip to S3
+      - name: Push Docker image
         run: |
-          aws s3 cp ecs-fargate-template.zip \
-            s3://my-ecs-artifacts-396608771737-eu-central-1/ecs-fargate-template.zip
+          docker push 396608771737.dkr.ecr.eu-central-1.amazonaws.com/java-web-app:latest
 
-      - name: Trigger CodePipeline
+      - name: Upload ECS artifacts to S3
         run: |
-          aws codepipeline start-pipeline-execution \
-            --name ECS-CodePipeline-trp0XdReD72w \
-            --region eu-central-1
+          aws s3 cp appspec.yml s3://java-web-artifacts-eu-central-1/source/appspec.yml
+          aws s3 cp taskdef.json s3://java-web-artifacts-eu-central-1/source/taskdef.json
