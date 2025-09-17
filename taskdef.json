@@ -1,9 +1,10 @@
 {
-  "family": "java-web-app",
+  "family": "java-web-taskdef",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "512",
+  "executionRoleArn": "arn:aws:iam::396608771737:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "java-web-app",
@@ -14,15 +15,7 @@
           "protocol": "tcp"
         }
       ],
-      "essential": true,
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/java-web-app",
-          "awslogs-region": "eu-central-1",
-          "awslogs-stream-prefix": "ecs"
-        }
-      }
+      "essential": true
     }
   ]
 }
