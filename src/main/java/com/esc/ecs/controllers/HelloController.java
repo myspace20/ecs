@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
     @GetMapping("/")
     public String hello() {
-        return "App is running with Spring Boot after test";
+        return "App is running with Spring Boot after test after s3";
     }
     @GetMapping("/health")
     public String health() {
