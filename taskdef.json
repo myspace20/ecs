@@ -8,7 +8,7 @@
   "containerDefinitions": [
     {
       "name": "java-web-app",
-      "image": "396608771737.dkr.ecr.eu-central-1.amazonaws.com/java-web-app:latest",
+      "image": "#{ImageURI}",
       "portMappings": [
         {
           "containerPort": 8080,

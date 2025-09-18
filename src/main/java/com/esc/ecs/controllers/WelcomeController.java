@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class WelcomeController {
     @GetMapping
     public String welcome() {
-        return "redirect:/index.html";
+        return "index.html";
     }
 }
