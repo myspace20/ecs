@@ -1,5 +1,5 @@
 {
-  "family": "java-web-taskdef",
+  "family": "java-web-service",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
@@ -10,10 +10,7 @@
       "name": "java-web-app",
       "image": "#{ImageURI}",
       "portMappings": [
-        {
-          "containerPort": 8080,
-          "protocol": "tcp"
-        }
+        { "containerPort": 8080, "protocol": "tcp" }
       ],
       "essential": true
     }
