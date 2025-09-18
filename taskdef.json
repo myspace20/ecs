@@ -1,18 +1,39 @@
 {
-  "family": "java-web-service",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
-  "executionRoleArn": "arn:aws:iam::396608771737:role/ecsTaskExecutionRole",
-  "containerDefinitions": [
+  "command": [],
+  "cpu": 256,
+  "credentialSpecs": [],
+  "dnsSearchDomains": [],
+  "dnsServers": [],
+  "dockerLabels": {},
+  "dockerSecurityOptions": [],
+  "entryPoint": [],
+  "environment": [],
+  "environmentFiles": [],
+  "essential": true,
+  "extraHosts": [],
+  "image": "396608771737.dkr.ecr.eu-central-1.amazonaws.com/java-web-app:latest",
+  "links": [],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/ecs/java-web-service",
+      "awslogs-region": "eu-central-1",
+      "awslogs-stream-prefix": "java-web-service"
+    },
+    "secretOptions": []
+  },
+  "memory": 512,
+  "mountPoints": [],
+  "name": "java-web-service",
+  "portMappings": [
     {
-      "name": "java-web-app",
-      "image": "#{ImageURI}",
-      "portMappings": [
-        { "containerPort": 8080, "protocol": "tcp" }
-      ],
-      "essential": true
+      "containerPort": 8080,
+      "hostPort": 8080,
+      "protocol": "tcp"
     }
-  ]
+  ],
+  "secrets": [],
+  "systemControls": [],
+  "ulimits": [],
+  "volumesFrom": []
 }

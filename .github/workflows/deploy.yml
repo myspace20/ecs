@@ -31,7 +31,7 @@ jobs:
         env:
           ECR_REGISTRY: 396608771737.dkr.ecr.eu-central-1.amazonaws.com
           ECR_REPOSITORY: java-web-app
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: latest
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -46,6 +46,3 @@ jobs:
         run: |
           aws s3 cp deploy_bundle.zip s3://java-web-artifacts-eu-central-1/source/deploy_bundle.zip
 
-#      - name: Trigger CodePipeline
-#        run: |
-#          aws codepipeline start-pipeline-execution --name java-web-pipeline
