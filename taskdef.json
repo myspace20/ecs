@@ -11,7 +11,7 @@
   "environmentFiles": [],
   "essential": true,
   "extraHosts": [],
-  "image": "396608771737.dkr.ecr.eu-central-1.amazonaws.com/java-web-app:latest",
+  "image": "003380495243.dkr.ecr.eu-central-1.amazonaws.com/java-web-app:latest",
   "links": [],
   "logConfiguration": {
     "logDriver": "awslogs",

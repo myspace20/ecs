@@ -3,7 +3,7 @@ Resources:
   - TargetService:
       Type: AWS::ECS::Service
       Properties:
-        TaskDefinition: "arn:aws:ecs:eu-central-1:396608771737:task-definition/java-web-service:3"
+        TaskDefinition: "arn:aws:ecs:eu-central-1:003380495243:task-definition/java-web-service:3"
         LoadBalancerInfo:
           ContainerName: "java-web-service"
           ContainerPort: 8080
